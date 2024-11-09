@@ -1,34 +1,29 @@
 import Header from "@/components/header";
-import { Button } from "@/components/ui/button";
 import React from "react";
 import "../index.css";
-import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MyListing from "./components/MyListing";
 
 function Profile() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
+      <div className="px-10 py-14 md:px-20 my-10">
+        <Tabs defaultValue="my-listing" className="w-full  justify-start">
+          <TabsList>
+            <TabsTrigger value="my-listing">My Listing</TabsTrigger>
+            <TabsTrigger value="inbox">Inbox</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+          </TabsList>
+          <TabsContent value="my-listing">
+          <MyListing />
+          </TabsContent>
+          <TabsContent value="inbox">Inbox Tab</TabsContent>
+          <TabsContent value="profile">Profile Tab</TabsContent>
+        </Tabs>
 
-      {/* Remove container class to allow full-width layout */}
-      <main className="w-full">
-        {/* Content wrapper with negative margin to allow button to reach edge */}
-        <div className="pt-24 pb-6 px-10">
-          {/* Flex container with relative positioning */}
-          <div className="flex items-center">
-            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900">
-              My Listing
-            </h2>
-            {/* Absolute positioning for the button */}
-            <div className="absolute right-0 mr-10">
-              <Link to="/add-listing">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
-                  + Add New Listing
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </main>
+        
+      </div>
     </div>
   );
 }

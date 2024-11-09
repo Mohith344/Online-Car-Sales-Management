@@ -24,14 +24,16 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Get all listings with images
-router.get('/', (req, res) => {
+router.get('/user/:email', (req, res) => {
+  const userEmail = req.params.email;
   const sql = `
     SELECT l.*, GROUP_CONCAT(li.imagePath) AS images
     FROM listings l
     LEFT JOIN listing_images li ON l.id = li.listing_id
+    WHERE l.email = ?
     GROUP BY l.id
   `;
-  db.query(sql, (err, results) => {
+  db.query(sql, [userEmail], (err, results) => {
     if (err) {
       console.error('Error retrieving listings:', err);
       return res.status(500).json({ message: 'Error retrieving listings', error: err.message });
@@ -107,7 +109,7 @@ router.post('/', upload.array('images', 10), (req, res) => {
       const listingId = result.insertId;
 
       // Insert image paths into listing_images table
-      const imagePaths = req.files.map(file => [listingId, file.path]);
+      const imagePaths = req.files.map(file => [listingId, path.relative(uploadDir, file.path)]);
       const imageSql = 'INSERT INTO listing_images (listing_id, imagePath) VALUES ?';
       db.query(imageSql, [imagePaths], (err) => {
         if (err) {

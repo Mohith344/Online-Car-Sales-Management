@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Get all listings with images
+// Get all listings with images for a user
 router.get('/user/:email', (req, res) => {
   const userEmail = req.params.email;
   const sql = `
@@ -42,8 +42,27 @@ router.get('/user/:email', (req, res) => {
   });
 });
 
+// Get a single listing by ID
+router.get('/:id', (req, res) => {
+  const listingId = req.params.id;
+  const sql = `
+    SELECT l.*, GROUP_CONCAT(li.imagePath) AS images
+    FROM listings l
+    LEFT JOIN listing_images li ON l.id = li.listing_id
+    WHERE l.id = ?
+    GROUP BY l.id
+  `;
+  db.query(sql, [listingId], (err, results) => {
+    if (err) {
+      console.error('Error retrieving listing:', err);
+      return res.status(500).json({ message: 'Error retrieving listing', error: err.message });
+    }
+    res.json(results[0]);
+  });
+});
+
 // Create a new listing
-router.post('/', upload.array('images', 10), (req, res) => {
+router.post('/', upload.array('newImages', 10), (req, res) => {
   const {
     listingTitle,
     tagline,
@@ -65,23 +84,25 @@ router.post('/', upload.array('images', 10), (req, res) => {
     vin,
     listingDescription,
     features,
-    email, // Add email to the request body
+    email,
+    existingImages, // Array of existing image filenames
   } = req.body;
 
-  const featuresJson = JSON.stringify(features); // Convert features to JSON string
+  const featuresJson = JSON.stringify(features);
 
   const sql = `
     INSERT INTO listings (
       listingTitle, tagline, originalPrice, sellingPrice, category, \`condition\`, make, model, year, driveType, transmission, fuelType, mileage, engineSize, cylinder, color, door, vin, listingDescription, features, email
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
+
   db.query(
     sql,
     [
       listingTitle,
       tagline,
       originalPrice,
-      sellingPrice || 0, // Default value for sellingPrice
+      sellingPrice || 0,
       category,
       condition,
       make,
@@ -98,7 +119,7 @@ router.post('/', upload.array('images', 10), (req, res) => {
       vin,
       listingDescription,
       featuresJson,
-      email, // Add email to the query parameters
+      email,
     ],
     (err, result) => {
       if (err) {
@@ -108,9 +129,25 @@ router.post('/', upload.array('images', 10), (req, res) => {
 
       const listingId = result.insertId;
 
+      // Handle existing images
+      let allImages = [];
+      if (existingImages) {
+        try {
+          allImages = JSON.parse(existingImages);
+        } catch (parseErr) {
+          console.error('Error parsing existingImages:', parseErr);
+          return res.status(400).json({ message: "Invalid existingImages format", error: parseErr.message });
+        }
+      }
+
+      // Handle new images
+      const newImagePaths = req.files.map(file => file.filename);
+      allImages = [...allImages, ...newImagePaths];
+
       // Insert image paths into listing_images table
-      const imagePaths = req.files.map(file => [listingId, path.relative(uploadDir, file.path)]);
+      const imagePaths = allImages.map(image => [listingId, image]);
       const imageSql = 'INSERT INTO listing_images (listing_id, imagePath) VALUES ?';
+
       db.query(imageSql, [imagePaths], (err) => {
         if (err) {
           console.error('Error saving images:', err);
@@ -121,5 +158,152 @@ router.post('/', upload.array('images', 10), (req, res) => {
     }
   );
 });
+
+// Update an existing listing
+router.put('/:id', upload.array('newImages', 10), (req, res) => {
+  const listingId = req.params.id;
+  const {
+    listingTitle,
+    tagline,
+    originalPrice,
+    sellingPrice,
+    category,
+    condition,
+    make,
+    model,
+    year,
+    driveType,
+    transmission,
+    fuelType,
+    mileage,
+    engineSize,
+    cylinder,
+    color,
+    door,
+    vin,
+    listingDescription,
+    features,
+    email,
+    existingImages, // Array of existing image filenames
+  } = req.body;
+
+  const featuresJson = JSON.stringify(features);
+
+  const sql = `
+    UPDATE listings SET
+      listingTitle = ?, tagline = ?, originalPrice = ?, sellingPrice = ?, category = ?, \`condition\` = ?, make = ?, model = ?, year = ?, driveType = ?, transmission = ?, fuelType = ?, mileage = ?, engineSize = ?, cylinder = ?, color = ?, door = ?, vin = ?, listingDescription = ?, features = ?, email = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    sql,
+    [
+      listingTitle,
+      tagline,
+      originalPrice,
+      sellingPrice || 0,
+      category,
+      condition,
+      make,
+      model,
+      year,
+      driveType,
+      transmission,
+      fuelType,
+      mileage,
+      engineSize,
+      cylinder,
+      color,
+      door,
+      vin,
+      listingDescription,
+      featuresJson,
+      email,
+      listingId
+    ],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating listing:', err);
+        return res.status(500).json({ message: "Error updating listing", error: err.message });
+      }
+
+      // Handle existing images
+      let allImages = [];
+      if (existingImages) {
+        try {
+          allImages = JSON.parse(existingImages);
+        } catch (parseErr) {
+          console.error('Error parsing existingImages:', parseErr);
+          return res.status(400).json({ message: "Invalid existingImages format", error: parseErr.message });
+        }
+      }
+
+      // Handle new images
+      const newImagePaths = req.files.map(file => file.filename);
+      allImages = [...allImages, ...newImagePaths];
+
+      // First, delete existing image entries from the DB
+      const deleteImageSql = 'DELETE FROM listing_images WHERE listing_id = ?';
+      db.query(deleteImageSql, [listingId], (err) => {
+        if (err) {
+          console.error('Error deleting old images:', err);
+          return res.status(500).json({ message: "Error deleting old images", error: err.message });
+        }
+
+        // Insert updated image paths
+        const imagePaths = allImages.map(image => [listingId, image]);
+        const insertImageSql = 'INSERT INTO listing_images (listing_id, imagePath) VALUES ?';
+
+        db.query(insertImageSql, [imagePaths], (err) => {
+          if (err) {
+            console.error('Error saving updated images:', err);
+            return res.status(500).json({ message: "Error saving updated images", error: err.message });
+          }
+          res.status(200).json({ message: 'Listing updated successfully' });
+        });
+      });
+    }
+  );
+});
+
+
+// DELETE a listing by ID
+router.delete('/:id', (req, res) => {
+  const listingId = req.params.id;
+
+  // First, retrieve all image paths related to this listing
+  const getImagesSql = 'SELECT imagePath FROM listing_images WHERE listing_id = ?';
+  db.query(getImagesSql, [listingId], (err, results) => {
+    if (err) {
+      console.error('Error retrieving images for deletion:', err);
+      return res.status(500).json({ message: 'Error retrieving images', error: err.message });
+    }
+
+    const imagePaths = results.map(row => row.imagePath);
+
+    // Delete the listing (including listing_images due to ON DELETE CASCADE)
+    const deleteListingSql = 'DELETE FROM listings WHERE id = ?';
+    db.query(deleteListingSql, [listingId], (err, result) => {
+      if (err) {
+        console.error('Error deleting listing:', err);
+        return res.status(500).json({ message: 'Error deleting listing', error: err.message });
+      }
+
+      // Now, delete image files from the filesystem
+      imagePaths.forEach(image => {
+        const filePath = path.join(uploadDir, image);
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Error deleting image file ${filePath}:`, err);
+            // Continue deleting other files even if one fails
+          }
+        });
+      });
+
+      res.status(200).json({ message: 'Listing deleted successfully' });
+    });
+  });
+});
+
 
 module.exports = router;

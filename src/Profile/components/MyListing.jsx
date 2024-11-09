@@ -27,6 +27,32 @@ function MyListing() {
     }
   }, [user]);
 
+  // Handler to delete a listing
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this listing?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/listings/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        console.log("Listing deleted successfully");
+        // Update the state to remove the deleted listing
+        setListings(listings.filter((listing) => listing.id !== id));
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to delete listing:", response.statusText, errorText);
+        alert("Failed to delete the listing. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      alert("An error occurred while deleting the listing.");
+    }
+  };
+
+
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
@@ -41,7 +67,7 @@ function MyListing() {
             <CarItem
               car={{
                 name: listing.listingTitle,
-                image: `http://localhost:5000/uploads/${listing.images.split(',')[0]}`,
+                image: listing.images ? `http://localhost:5000/uploads/${listing.images.split(',')[0]}` : "",
                 miles: listing.mileage,
                 fuelType: listing.fuelType,
                 gearType: listing.transmission,
@@ -49,8 +75,10 @@ function MyListing() {
               }}
             />
             <div className="rounde-lg gap-2 bg-gray-50 p-2 flex justify-between mt-4">
+              <Link to={`/add-listing/${listing.id}`} className="w-full">
               <Button  className="w-full bg-slate-600 hover:bg-blue-500"><FaEdit /></Button>
-              <Button className="bg-red-400 hover:bg-red-500"><MdDelete /></Button>
+              </Link>
+              <Button className="bg-red-400 hover:bg-red-500" onClick={() => handleDelete(listing.id)}><MdDelete /></Button>
             </div>
           </div>
         ))}

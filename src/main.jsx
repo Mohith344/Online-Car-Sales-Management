@@ -23,6 +23,10 @@ const router = createBrowserRouter([
    {
     path: '/add-listing',
     element: <AddListing />,
+   },
+   {
+    path: '/add-listing/:id',
+    element: <AddListing />
    }
 ])
 

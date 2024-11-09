@@ -7,9 +7,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const DropdownField = ({ item, handleInputChange }) => {
+const DropdownField = ({ item, handleInputChange,value }) => {
   return (
-    <Select onValueChange={(value) => handleInputChange(item.name, value)}>
+    <Select value={value} onValueChange={(value) => handleInputChange(item.name, value)}>
       <SelectTrigger
         className="w-full p-2 border text-gray-700 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       >

@@ -1,5 +1,7 @@
 import Header from "@/components/header";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import carDetails from "../Shared/carDetails.json";
 import InputField from "./components/InputField";
 import DropdownField from "./components/DropdownField";
@@ -10,12 +12,10 @@ import { CheckCircledIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import UploadImages from "./components/UploadImages";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react"; // Import useUser from @clerk/clerk-react
 import { AiOutlineLoading } from "react-icons/ai";
 
 function AddListing() {
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     listingTitle: "",
     tagline: "",
     originalPrice: "",
@@ -36,39 +36,85 @@ function AddListing() {
     vin: "",
     listingDescription: "",
     features: [],
-    images: [], // Add images to formData
+    existingImages: [], // Existing image file names
+    newImages: [], // New image File objects
   });
 
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useUser(); // Get the user object from useUser
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (id) {
+      const fetchListing = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/api/listings/${id}`);
+          const data = await response.json();
+          console.log("Fetched data:", data);
+          setFormData({
+            listingTitle: data.listingTitle,
+            tagline: data.tagline,
+            originalPrice: data.originalPrice,
+            sellingPrice: data.sellingPrice,
+            category: data.category,
+            condition: data.condition,
+            make: data.make,
+            model: data.model,
+            year: data.year,
+            driveType: data.driveType,
+            transmission: data.transmission,
+            fuelType: data.fuelType,
+            mileage: data.mileage,
+            engineSize: data.engineSize,
+            cylinder: data.cylinder,
+            color: data.color,
+            door: data.door,
+            vin: data.vin,
+            listingDescription: data.listingDescription,
+            features: JSON.parse(data.features),
+            existingImages: data.images ? data.images.split(",") : [],
+            newImages: [],
+          });
+        } catch (error) {
+          console.error("Error fetching listing:", error);
+        }
+      };
+
+      fetchListing();
+    }
+  }, [id]);
 
   const handleInputChange = (name, value) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
-    console.log(formData); // Log the updated formData
+    }));
+    console.log(formData);
   };
 
   const handleCheckboxChange = (name, checked) => {
-    setFormData((prevFormData) => {
+    setFormData((prev) => {
       const newFeatures = checked
-        ? [...prevFormData.features, name]
-        : prevFormData.features.filter((feature) => feature !== name);
+        ? [...prev.features, name]
+        : prev.features.filter((feature) => feature !== name);
       return {
-        ...prevFormData,
+        ...prev,
         features: newFeatures,
       };
     });
-    console.log(formData); // Log the updated formData
+    console.log(formData);
   };
 
-  const handleImageChange = (images) => {
-    setFormData({
-      ...formData,
-      images: images,
-    });
+  const handleImageChange = (updatedImages) => {
+    const existing = updatedImages.filter((img) => typeof img === "string");
+    const newImgs = updatedImages.filter((img) => img instanceof File);
+    setFormData((prev) => ({
+      ...prev,
+      existingImages: existing,
+      newImages: newImgs,
+    }));
+    console.log(formData);
   };
 
   const onsubmit = async (e) => {
@@ -96,25 +142,30 @@ function AddListing() {
     dataToSend.append("door", parseInt(formData.door, 10) || null);
     dataToSend.append("vin", formData.vin);
     dataToSend.append("listingDescription", formData.listingDescription);
-    dataToSend.append("features", JSON.stringify(formData.features)); // Convert array to JSON string
-    dataToSend.append("email", user.primaryEmailAddress.emailAddress); // Add user's email address
-    formData.images.forEach((image) => {
-      dataToSend.append("images", image);
+    dataToSend.append("features", JSON.stringify(formData.features));
+    dataToSend.append("email", user.primaryEmailAddress.emailAddress);
+
+    // Append existing images as JSON string
+    dataToSend.append("existingImages", JSON.stringify(formData.existingImages));
+
+    // Append new image files
+    formData.newImages.forEach((image) => {
+      dataToSend.append("newImages", image);
     });
 
     try {
-      const response = await fetch("http://localhost:5000/api/listings", {
-        method: "POST",
+      const response = await fetch(`http://localhost:5000/api/listings${id ? `/${id}` : ''}`, {
+        method: id ? 'PUT' : 'POST',
         body: dataToSend,
       });
 
       if (response.ok) {
-        console.log("Listing added successfully");
+        console.log(id ? "Listing updated successfully" : "Listing added successfully");
         setLoading(false);
-        navigate("/profile"); // Navigate to the profile page
+        navigate("/profile");
       } else {
         const errorText = await response.text();
-        console.error("Failed to add listing:", response.statusText, errorText);
+        console.error("Failed to add/update listing:", response.statusText, errorText);
         setLoading(false);
       }
     } catch (error) {
@@ -128,7 +179,7 @@ function AddListing() {
       <Header />
       <div className="pt-10 mt-20 px-4">
         <div className="mb-8 text-center">
-          <h2 className="font-bold text-4xl">Add New Listing</h2>
+          <h2 className="font-bold text-4xl">{id ? 'Edit Listing' : 'Add New Listing'}</h2>
         </div>
         <form className="w-full" onSubmit={onsubmit}>
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-8 w-full">
@@ -144,16 +195,19 @@ function AddListing() {
                     <InputField
                       item={item}
                       handleInputChange={handleInputChange}
+                      value={formData[item.name]} // Pre-fill the form field
                     />
                   ) : item.fieldType === "dropdown" ? (
                     <DropdownField
                       item={item}
                       handleInputChange={handleInputChange}
+                      value={formData[item.name]} // Pre-fill the form field
                     />
                   ) : item.fieldType === "textarea" ? (
                     <TextAreaField
                       item={item}
                       handleInputChange={handleInputChange}
+                      value={formData[item.name]} // Pre-fill the form field
                     />
                   ) : null}
                 </div>
@@ -178,6 +232,7 @@ function AddListing() {
                         height: "16px",
                         borderRadius: "4px",
                       }}
+                      checked={formData.features.includes(item.name)}
                       onCheckedChange={(checked) =>
                         handleCheckboxChange(item.name, checked)
                       }
@@ -203,13 +258,13 @@ function AddListing() {
               </div>
             </div>
           </div>
-          <Separator className="my-6"/>
+          <Separator className="my-6" />
           {/* Car Images */}
-          <UploadImages handleImageChange={handleImageChange} />
+          <UploadImages handleImageChange={handleImageChange} initialImages={formData.existingImages} />
 
           <div className="mt-10 flex justify-end">
             <Button type="submit" disabled={loading}>
-              {loading ? <AiOutlineLoading className="animate-spin"/> : "Submit"}
+              {loading ? <AiOutlineLoading className="animate-spin" /> : id ? "Update Listing" : "Submit"}
             </Button>
           </div>
         </form>

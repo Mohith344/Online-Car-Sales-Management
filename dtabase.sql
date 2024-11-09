@@ -33,3 +33,8 @@ CREATE TABLE listing_images (
   imagePath VARCHAR(255),
   FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE
 );
+
+ALTER TABLE listings ADD COLUMN email VARCHAR(255);
+
+--performed lot of testing for the database and deleted the recodrs for final but the auto increment is still working 
+--and the id's startig from when the last record were delted handle this

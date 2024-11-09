@@ -10,6 +10,9 @@ import { CheckCircledIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import UploadImages from "./components/UploadImages";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react"; // Import useUser from @clerk/clerk-react
+import { AiOutlineLoading } from "react-icons/ai";
 
 function AddListing() {
   const [formData, setFormData] = React.useState({
@@ -36,6 +39,10 @@ function AddListing() {
     images: [], // Add images to formData
   });
 
+  const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
+  const { user } = useUser(); // Get the user object from useUser
+
   const handleInputChange = (name, value) => {
     setFormData({
       ...formData,
@@ -57,16 +64,17 @@ function AddListing() {
     console.log(formData); // Log the updated formData
   };
 
-    const handleImageChange = (images) => {
+  const handleImageChange = (images) => {
     setFormData({
       ...formData,
       images: images,
     });
   };
-  
+
   const onsubmit = async (e) => {
     e.preventDefault();
-  
+    setLoading(true);
+
     // Prepare form data
     const dataToSend = new FormData();
     dataToSend.append("listingTitle", formData.listingTitle);
@@ -89,25 +97,29 @@ function AddListing() {
     dataToSend.append("vin", formData.vin);
     dataToSend.append("listingDescription", formData.listingDescription);
     dataToSend.append("features", JSON.stringify(formData.features)); // Convert array to JSON string
+    dataToSend.append("email", user.primaryEmailAddress.emailAddress); // Add user's email address
     formData.images.forEach((image) => {
       dataToSend.append("images", image);
     });
-  
+
     try {
       const response = await fetch("http://localhost:5000/api/listings", {
         method: "POST",
         body: dataToSend,
       });
-  
+
       if (response.ok) {
         console.log("Listing added successfully");
-        // Optionally clear the form or show a success message
+        setLoading(false);
+        navigate("/profile"); // Navigate to the profile page
       } else {
         const errorText = await response.text();
         console.error("Failed to add listing:", response.statusText, errorText);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error:", error);
+      setLoading(false);
     }
   };
 
@@ -196,7 +208,9 @@ function AddListing() {
           <UploadImages handleImageChange={handleImageChange} />
 
           <div className="mt-10 flex justify-end">
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? <AiOutlineLoading className="animate-spin"/> : "Submit"}
+            </Button>
           </div>
         </form>
       </div>

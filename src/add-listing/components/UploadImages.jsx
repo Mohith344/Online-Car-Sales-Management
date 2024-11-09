@@ -3,6 +3,7 @@ import { IoCloseCircle } from "react-icons/io5";
 
 function UploadImages({ handleImageChange }) {
   const [selectedFileList, setSelectedFileList] = useState([]);
+  
 
   const onFileSelected = (event) => {
     const files = event.target.files;
@@ -15,7 +16,9 @@ function UploadImages({ handleImageChange }) {
     }
     setSelectedFileList((prev) => [...prev, ...newFiles]);
     handleImageChange([...selectedFileList, ...newFiles]); // Call handleImageChange with the selected files
+    
   };
+
 
   const onImageRemove = (image, index) => {
     const result = selectedFileList.filter((item) => item !== image);

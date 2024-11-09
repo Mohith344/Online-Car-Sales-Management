@@ -23,9 +23,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Get all listings
+// Get all listings with images
 router.get('/', (req, res) => {
-  db.query('SELECT * FROM listings', (err, results) => {
+  const sql = `
+    SELECT l.*, GROUP_CONCAT(li.imagePath) AS images
+    FROM listings l
+    LEFT JOIN listing_images li ON l.id = li.listing_id
+    GROUP BY l.id
+  `;
+  db.query(sql, (err, results) => {
     if (err) {
       console.error('Error retrieving listings:', err);
       return res.status(500).json({ message: 'Error retrieving listings', error: err.message });
@@ -57,14 +63,15 @@ router.post('/', upload.array('images', 10), (req, res) => {
     vin,
     listingDescription,
     features,
+    email, // Add email to the request body
   } = req.body;
 
   const featuresJson = JSON.stringify(features); // Convert features to JSON string
 
   const sql = `
     INSERT INTO listings (
-      listingTitle, tagline, originalPrice, sellingPrice, category, \`condition\`, make, model, year, driveType, transmission, fuelType, mileage, engineSize, cylinder, color, door, vin, listingDescription, features
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      listingTitle, tagline, originalPrice, sellingPrice, category, \`condition\`, make, model, year, driveType, transmission, fuelType, mileage, engineSize, cylinder, color, door, vin, listingDescription, features, email
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   db.query(
     sql,
@@ -89,6 +96,7 @@ router.post('/', upload.array('images', 10), (req, res) => {
       vin,
       listingDescription,
       featuresJson,
+      email, // Add email to the query parameters
     ],
     (err, result) => {
       if (err) {

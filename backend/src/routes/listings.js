@@ -23,6 +23,58 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+/**
+ * GET /api/listings/search
+ * Query Parameters:
+ * - condition: String (e.g., "New", "Used", "Certified Pre-Owned")
+ * - make: String (e.g., "Toyota", "Honda")
+ * - price: Number (Max Price)
+ */
+router.get('/Search', (req, res) => {
+  const { condition, make, price } = req.query;
+
+  let sql = `
+    SELECT l.*, GROUP_CONCAT(li.imagePath) AS images
+    FROM listings l
+    LEFT JOIN listing_images li ON l.id = li.listing_id
+  `;
+
+  let conditions = [];
+  let values = [];
+
+  if (condition) {
+    conditions.push('l.condition = ?');
+    values.push(condition);
+  }
+
+  if (make) {
+    conditions.push('l.make = ?');
+    values.push(make);
+  }
+
+  if (price) {
+    conditions.push('l.sellingPrice <= ?');
+    values.push(price);
+  }
+
+  if (conditions.length > 0) {
+    sql += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  sql += ' GROUP BY l.id';
+
+  db.query(sql, values, (err, results) => {
+    if (err) {
+      console.error('Error executing search query:', err);
+      return res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+
+    res.json(results);
+  });
+});
+
+
+
 // Get all listings with images for a user
 router.get('/user/:email', (req, res) => {
   const userEmail = req.params.email;
@@ -36,6 +88,25 @@ router.get('/user/:email', (req, res) => {
   db.query(sql, [userEmail], (err, results) => {
     if (err) {
       console.error('Error retrieving listings:', err);
+      return res.status(500).json({ message: 'Error retrieving listings', error: err.message });
+    }
+    res.json(results);
+  });
+});
+
+// New Route: GET listings by category
+router.get('/category/:category', (req, res) => {
+  const category = req.params.category;
+  const sql = `
+    SELECT l.*, GROUP_CONCAT(li.imagePath) AS images
+    FROM listings l
+    LEFT JOIN listing_images li ON l.id = li.listing_id
+    WHERE l.category = ?
+    GROUP BY l.id
+  `;
+  db.query(sql, [category], (err, results) => {
+    if (err) {
+      console.error('Error retrieving listings by category:', err);
       return res.status(500).json({ message: 'Error retrieving listings', error: err.message });
     }
     res.json(results);
@@ -159,6 +230,13 @@ router.post('/', upload.array('newImages', 10), (req, res) => {
   );
 });
 
+
+
+
+
+
+
+
 // Update an existing listing
 router.put('/:id', upload.array('newImages', 10), (req, res) => {
   const listingId = req.params.id;
@@ -265,6 +343,9 @@ router.put('/:id', upload.array('newImages', 10), (req, res) => {
     }
   );
 });
+
+
+
 
 
 // DELETE a listing by ID

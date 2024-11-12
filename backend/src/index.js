@@ -18,6 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const db = require('./db');
 
 // Routes
+// eslint-disable-next-line no-undef
 const listingsRouter = require('./routes/listings');
 app.use('/api/listings', listingsRouter);
 

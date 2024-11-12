@@ -123,6 +123,7 @@ function SearchByOptions() {
               <CarItem
                 key={listing.id}
                 car={{
+                  id: listing.id,
                   name: listing.listingTitle,
                   image: listing.images ? `http://localhost:5000/uploads/${listing.images.split(',')[0]}` : '',
                   miles: listing.mileage,

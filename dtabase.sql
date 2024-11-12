@@ -36,5 +36,14 @@ CREATE TABLE listing_images (
 
 ALTER TABLE listings ADD COLUMN email VARCHAR(255);
 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    clerk_user_id VARCHAR(255) NOT NULL UNIQUE
+);
+
+
 --performed lot of testing for the database and deleted the recodrs for final but the auto increment is still working 
 --and the id's startig from when the last record were delted handle this

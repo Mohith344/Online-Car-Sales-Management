@@ -66,6 +66,7 @@ function MyListing() {
           <div key={listing.id} className="border rounded-lg p-4">
             <CarItem
               car={{
+                id: listing.id,
                 name: listing.listingTitle,
                 image: listing.images ? `http://localhost:5000/uploads/${listing.images.split(',')[0]}` : "",
                 miles: listing.mileage,

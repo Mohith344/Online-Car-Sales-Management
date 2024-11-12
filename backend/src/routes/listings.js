@@ -31,7 +31,7 @@ const upload = multer({ storage });
  * - price: Number (Max Price)
  */
 router.get('/Search', (req, res) => {
-  const { condition, make, price } = req.query;
+  const { condition, make, price, limit } = req.query;
 
   let sql = `
     SELECT l.*, GROUP_CONCAT(li.imagePath) AS images
@@ -62,6 +62,15 @@ router.get('/Search', (req, res) => {
   }
 
   sql += ' GROUP BY l.id';
+
+  // Handle the limit parameter
+  if (limit) {
+    const parsedLimit = parseInt(limit, 10);
+    if (!isNaN(parsedLimit) && parsedLimit > 0) {
+      sql += ' LIMIT ?';
+      values.push(parsedLimit);
+    }
+  }
 
   db.query(sql, values, (err, results) => {
     if (err) {

@@ -43,7 +43,7 @@ function Search() {
 
   return (
     <div className="flex justify-center items-center p-2 bg-white rounded-md md:rounded-full 
-    flex-col md:flex md:flex-row gap-10 px-5 w-[60%] mx-auto">
+    flex-col md:flex md:flex-row gap-10 px-5 w-[80%] mx-auto">
       <Select value={condition} onValueChange={setCondition}>
         <SelectTrigger className="w-full text-gray-800 dark:text-white p-5 outline-none md:border-none shadow-none text-lg">
           <SelectValue placeholder="Condition" />

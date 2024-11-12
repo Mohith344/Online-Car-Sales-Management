@@ -3,10 +3,12 @@ import { Separator } from './ui/separator'
 import { BsFuelPumpDieselFill } from "react-icons/bs";
 import { IoSpeedometerSharp } from "react-icons/io5";
 import { GiGearStick } from "react-icons/gi";
+import { Link } from 'react-router-dom';
 
 
 function CarItem({car}) {
   return (
+    <Link to={'/listing-details/'+car?.id}>
     <div className="bg-white shadow-lg rounded-xl overflow-hidden transform transition-transform hover:scale-105">
         <h2 className='absolute m-2 bg-green-500 px-2 rounded-full text-sm pb-1 text-white'>New</h2>
         <img src={car.image} alt={car.name} width={300} height={250}
@@ -39,6 +41,7 @@ function CarItem({car}) {
             </div>
         </div>
     </div>
+    </Link>
   )
 }
 

@@ -1,11 +1,11 @@
 // frontend/src/components/Pricing.jsx
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
-import { MdSell } from "react-icons/md";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
+import { MdOutlineDriveEta } from "react-icons/md";
 
-function Pricing({ carDetails }) {
+function TestDriveBook({ carDetails }) {
   const {id} = useParams();
   const navigate = useNavigate();
   const { isSignedIn } = useUser();
@@ -18,7 +18,7 @@ function Pricing({ carDetails }) {
   const handleBuyNow = () => {
     if (isSignedIn) {
       // Navigate to Payment page with listing ID
-      navigate(`/payment/${id}`);
+    //   navigate(`/payment/${id}`);
     } else {
       // Open modal with sign-in/sign-up prompt
       setIsModalOpen(true);
@@ -30,11 +30,11 @@ function Pricing({ carDetails }) {
   };
 
   return (
-    <div className='p-10 border rounded-xl shadow-md'>
-      <h2>Our Price</h2>
-      <h2 className='font-bold text-4xl'>${carDetails?.sellingPrice}</h2>
+    <div className='p-10 mt-4 border rounded-xl shadow-md'>
+        <h2 className='font-bold text-4xl'>Want Test Drive!!</h2>
+        <h2>click below!!</h2>
       <Button className="w-full mt-7" size="lg" onClick={handleBuyNow}>
-        <MdSell className='text-lg' />Buy Now
+        <MdOutlineDriveEta className='text-xl mr-1' />Book Test Drive
       </Button>
 
       {/* Modal */}
@@ -56,4 +56,4 @@ function Pricing({ carDetails }) {
   );
 }
 
-export default Pricing;
+export default TestDriveBook;

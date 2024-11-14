@@ -7,6 +7,7 @@ import Descriptions from '../components/Descriptions';
 import Features from '../components/features';
 import Pricing from '../components/Pricing';
 import Specifications from '../components/Specifications';
+import TestDriveBook from '../components/TestDriveBook';
 
 
 
@@ -72,6 +73,8 @@ function ListingDetail() {
                     <Pricing carDetails={carDetails}/>
                     {/*Specifications*/}
                     <Specifications carDetails={carDetails}/>
+                    {/*TestDriveBook*/}
+                    <TestDriveBook carDetails={carDetails}/>
                 </div>
             </div>
         </div>

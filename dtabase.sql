@@ -40,10 +40,26 @@ ALTER TABLE listings ADD COLUMN email VARCHAR(255);
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    clerk_user_id VARCHAR(255) NOT NULL UNIQUE
+    email VARCHAR(255) NOT NULL UNIQUE
+    --clerk_user_id VARCHAR(255) NOT NULL UNIQUE
 );
 
+-- Add 'status' column with default value 'on sale'
+ALTER TABLE listings
+ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'on sale';
+
+CREATE TABLE orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  listing_id INT NOT NULL,
+  buyer_email VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(20) NOT NULL,
+  bank_name VARCHAR(255) NOT NULL,
+  account_number VARCHAR(50) NOT NULL,
+  routing_number VARCHAR(50) NOT NULL,
+  booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(50) NOT NULL DEFAULT 'booked',
+  FOREIGN KEY (listing_id) REFERENCES listings(id) ON DELETE CASCADE
+);
 
 --performed lot of testing for the database and deleted the recodrs for final but the auto increment is still working 
 --and the id's startig from when the last record were delted handle this

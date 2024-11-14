@@ -9,6 +9,8 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import SearchByCategory from './Search/[category]'
 import SearchByOptions from './Search'
 import ListingDetail from './listing-details/[id]'
+import Payment from './components/Payment'
+import Confirmation from './components/Confirmation'
 
 const router = createBrowserRouter([
    {
@@ -42,10 +44,18 @@ const router = createBrowserRouter([
    {
     path:'/listing-details/:id',
     element: <ListingDetail />
+   },
+   {
+    path: '/payment/:id',
+    element: <Payment />
+   },
+   {
+    path: '/confirmation',
+    element: <Confirmation />
    }
 ])
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")

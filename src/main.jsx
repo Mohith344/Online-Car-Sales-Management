@@ -11,6 +11,7 @@ import SearchByOptions from './Search'
 import ListingDetail from './listing-details/[id]'
 import Payment from './components/Payment'
 import Confirmation from './components/Confirmation'
+import TestDriveBooking from './components/TestDriveBooking'
 
 const router = createBrowserRouter([
    {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
    {
     path: '/confirmation',
     element: <Confirmation />
+   },
+   {
+    path:'/test-drive-booking/:id',
+    element: <TestDriveBooking />
    }
 ])
 

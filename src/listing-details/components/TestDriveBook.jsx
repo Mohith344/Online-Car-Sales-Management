@@ -15,10 +15,10 @@ function TestDriveBook({ carDetails }) {
    // Access isSignedIn from Clerk
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleBuyNow = () => {
+  const handleBookNow = () => {
     if (isSignedIn) {
       // Navigate to Payment page with listing ID
-    //   navigate(`/payment/${id}`);
+       navigate(`/test-drive-booking/${id}`);
     } else {
       // Open modal with sign-in/sign-up prompt
       setIsModalOpen(true);
@@ -33,7 +33,7 @@ function TestDriveBook({ carDetails }) {
     <div className='p-10 mt-4 border rounded-xl shadow-md'>
         <h2 className='font-bold text-4xl'>Want Test Drive!!</h2>
         <h2>click below!!</h2>
-      <Button className="w-full mt-7" size="lg" onClick={handleBuyNow}>
+      <Button className="w-full mt-7" size="lg" onClick={handleBookNow}>
         <MdOutlineDriveEta className='text-xl mr-1' />Book Test Drive
       </Button>
 

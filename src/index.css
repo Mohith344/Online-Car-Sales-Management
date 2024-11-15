@@ -137,3 +137,30 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Date and Time Input Customizations */
+input[type="date"],
+input[type="time"] {
+  background-color: #EFF6FF; /* Use your desired background color */
+  color: black; /* Text color for visibility */
+  padding-right: 2.5rem; /* Ensure spacing for the icon */
+  border-radius: var(--radius); /* Maintain consistency with other inputs */
+  @apply px-3 py-2 border; /* Tailwind utility for padding and border */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* Makes the icon visible on dark backgrounds */
+  opacity: 1; /* Ensure full visibility */
+  cursor: pointer; /* Indicate that the icon is clickable */
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+input[type="time"]:hover::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) brightness(1.2); /* Slight hover effect for better UX */
+}
+
+input[type="date"]::-webkit-clear-button,
+input[type="time"]::-webkit-clear-button {
+  display: none; /* Hides the clear button (optional) */
+}

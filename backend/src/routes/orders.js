@@ -85,4 +85,55 @@ router.post('/', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/orders
+ * Query Parameters:
+ * - buyer_email: String
+ */
+router.get('/', async (req, res) => {
+  const { buyer_email } = req.query;
+
+  if (!buyer_email) {
+    return res.status(400).json({ message: 'Missing buyer_email parameter.' });
+  }
+
+  try {
+    const [rows] = await db.promise().query(
+      `SELECT orders.id, listings.listingTitle, orders.booking_date, orders.status
+       FROM orders
+       JOIN listings ON orders.listing_id = listings.id
+       WHERE orders.buyer_email = ?`,
+      [buyer_email]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+});
+
+/**
+ * DELETE /api/orders/:id
+ * Path Parameters:
+ * - id: Number (Order ID)
+ */
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.promise().execute('DELETE FROM orders WHERE id = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    res.json({ message: 'Order cancelled successfully.' });
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+});
+
+
 module.exports = router;

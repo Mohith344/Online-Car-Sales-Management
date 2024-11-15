@@ -25,10 +25,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const listingsRouter = require('./routes/listings');
 const usersRouter = require('./routes/user');
 const ordersRouter = require('./routes/orders'); // Import Orders route
+const testDriveBookingsRouter = require('./routes/test_drive_bookings'); // Import Test Drive Bookings route
 
 app.use('/api/listings', listingsRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/orders', ordersRouter); // Use Orders route
+app.use('/api/orders', ordersRouter);
+app.use('/api/test_drive_bookings', testDriveBookingsRouter); // Use Test Drive Bookings route
 
 // Error handling middleware
 app.use((err, req, res, next) => {

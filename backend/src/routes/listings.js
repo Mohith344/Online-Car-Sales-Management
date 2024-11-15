@@ -141,6 +141,26 @@ router.get('/:id', (req, res) => {
   });
 });
 
+// backend/src/routes/listings.js
+
+// Add this route to calculate total earnings for a user
+router.get('/earnings/:email', async (req, res) => {
+  const userEmail = req.params.email;
+  const sql = `
+    SELECT SUM(sellingPrice) AS totalEarnings
+    FROM listings
+    WHERE email = ?
+  `;
+  try {
+    const [rows] = await db.promise().query(sql, [userEmail]);
+    const totalEarnings = rows[0].totalEarnings || 0;
+    res.json({ totalEarnings });
+  } catch (err) {
+    console.error('Error fetching total earnings:', err);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+});
+
 // Create a new listing
 router.post('/', upload.array('newImages', 10), (req, res) => {
   const {

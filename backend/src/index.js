@@ -26,11 +26,13 @@ const listingsRouter = require('./routes/listings');
 const usersRouter = require('./routes/user');
 const ordersRouter = require('./routes/orders'); // Import Orders route
 const testDriveBookingsRouter = require('./routes/test_drive_bookings'); // Import Test Drive Bookings route
+const profileRoutes = require('./routes/profile');
 
 app.use('/api/listings', listingsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/test_drive_bookings', testDriveBookingsRouter); // Use Test Drive Bookings route
+app.use('/api/profile', profileRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

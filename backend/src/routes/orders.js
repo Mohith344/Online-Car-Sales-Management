@@ -114,6 +114,67 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/orders/incoming
+ * Query Parameters:
+ * - owner_email: String
+ */
+router.get('/incoming', async (req, res) => {
+  const { owner_email } = req.query;
+
+  if (!owner_email) {
+    return res.status(400).json({ message: 'Missing owner_email parameter.' });
+  }
+
+  try {
+    const [rows] = await db.promise().query(
+      `SELECT orders.id, orders.buyer_email, listings.listingTitle, orders.booking_date, orders.status
+       FROM orders
+       JOIN listings ON orders.listing_id = listings.id
+       WHERE listings.email = ?`,
+      [owner_email]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching incoming orders:', error);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+});
+
+/**
+ * POST /api/orders/:id/accept
+ * Path Parameters:
+ * - id: Number (Order ID)
+ */
+router.post('/:id/accept', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Check if the order exists
+    const [orderRows] = await db.promise().execute(
+      'SELECT * FROM orders WHERE id = ?',
+      [id]
+    );
+
+    if (orderRows.length === 0) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    // Update the order status to 'accepted'
+    await db.promise().execute(
+      'UPDATE orders SET status = "accepted" WHERE id = ?',
+      [id]
+    );
+
+    res.json({ message: 'Order accepted successfully.' });
+  } catch (error) {
+    console.error('Error accepting order:', error);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+})
+
+
+/**
  * DELETE /api/orders/:id
  * Path Parameters:
  * - id: Number (Order ID)

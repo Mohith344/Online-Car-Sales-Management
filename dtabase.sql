@@ -125,8 +125,8 @@ CREATE TRIGGER after_order_delete
 AFTER DELETE ON orders
 FOR EACH ROW
 BEGIN
-    INSERT INTO cancellation_logs (user_id, item_type, item_id, reason)
-    VALUES (OLD.user_id, 'order', OLD.id, 'Cancelled by user');
+    INSERT INTO cancellation_logs (user_email, item_type, item_id, reason)
+    VALUES (OLD.buyer_email, 'order', OLD.id, 'Cancelled by user');
 END$$
 
 DELIMITER ;
@@ -138,8 +138,8 @@ CREATE TRIGGER after_test_drive_booking_delete
 AFTER DELETE ON test_drive_bookings
 FOR EACH ROW
 BEGIN
-    INSERT INTO cancellation_logs (user_id, item_type, item_id, reason)
-    VALUES (OLD.user_id, 'test_drive_booking', OLD.id, 'Cancelled by user');
+    INSERT INTO cancellation_logs (user_email, item_type, item_id, reason)
+    VALUES (OLD.user_email, 'test_drive_booking', OLD.id, 'Cancelled by user');
 END$$
 
 DELIMITER ;

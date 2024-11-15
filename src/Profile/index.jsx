@@ -4,6 +4,7 @@ import "../index.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MyListing from "./components/MyListing";
 import Inbox from "./components/Inbox";
+import ProfileTab from "./components/ProfileTab";
 
 function Profile() {
   return (
@@ -22,7 +23,9 @@ function Profile() {
           <TabsContent value="inbox">
             <Inbox />
           </TabsContent>
-          <TabsContent value="profile">Profile Tab</TabsContent>
+          <TabsContent value="profile">
+            <ProfileTab />
+          </TabsContent>
         </Tabs>
 
         

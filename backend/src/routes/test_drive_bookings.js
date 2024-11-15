@@ -89,6 +89,69 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/test_drive_bookings/incoming
+ * Query Parameters:
+ * - owner_email: String
+ */
+router.get('/incoming', async (req, res) => {
+  const { owner_email } = req.query;
+
+  if (!owner_email) {
+    return res.status(400).json({ message: 'Missing owner_email parameter.' });
+  }
+
+  try {
+    const [rows] = await db.promise().query(
+      `SELECT test_drive_bookings.id, test_drive_bookings.user_email, listings.listingTitle, test_drive_bookings.test_drive_date, test_drive_bookings.test_drive_time, test_drive_bookings.status
+       FROM test_drive_bookings
+       JOIN listings ON test_drive_bookings.listing_id = listings.id
+       WHERE listings.email = ?`,
+      [owner_email]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching incoming test drive bookings:', error);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+});
+
+/**
+ * POST /api/test_drive_bookings/:id/accept
+ * Path Parameters:
+ * - id: Number (Booking ID)
+ */
+router.post('/:id/accept', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Check if the booking exists
+    const [bookingRows] = await db.promise().execute(
+      'SELECT * FROM test_drive_bookings WHERE id = ?',
+      [id]
+    );
+
+    if (bookingRows.length === 0) {
+      return res.status(404).json({ message: 'Test drive booking not found.' });
+    }
+
+    // Update the booking status to 'accepted'
+    await db.promise().execute(
+      'UPDATE test_drive_bookings SET status = "accepted" WHERE id = ?',
+      [id]
+    );
+
+    res.json({ message: 'Test drive booking accepted successfully.' });
+  } catch (error) {
+    console.error('Error accepting test drive booking:', error);
+    res.status(500).json({ message: 'Internal Server Error.' });
+  }
+});
+
+
+
+
+/**
  * DELETE /api/test_drive_bookings/:id
  * Path Parameters:
  * - id: Number (Booking ID)

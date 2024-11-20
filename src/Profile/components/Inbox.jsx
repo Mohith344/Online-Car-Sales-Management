@@ -328,7 +328,7 @@ function Inbox() {
         <Separator />
         {/* Incoming Test Drive Bookings */}
         <section>
-          <h2 className="font-bold  mt-3text-3xl">Incoming Test Drive Bookings</h2>
+          <h2 className="font-bold  mt-3 text-3xl">Incoming Test Drive Bookings</h2>
           {incomingBookings.length === 0 ? (
             <p>No incoming test drive bookings.</p>
           ) : (

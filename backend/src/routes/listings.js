@@ -1,3 +1,4 @@
+// Import necessary modules and dependencies
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
@@ -6,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure the uploads directory exists
+// Configure Multer for handling file uploads with custom storage options
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -30,6 +32,10 @@ const upload = multer({ storage });
  * - make: String (e.g., "Toyota", "Honda")
  * - price: Number (Max Price)
  */
+// Route: Search listings with filters for condition, make, price, and limit
+// Constructs and executes a dynamic SQL query based on provided query parameters
+// Returns results as JSON, including associated images
+
 router.get('/Search', (req, res) => {
   const { condition, make, price, limit } = req.query;
 
@@ -85,6 +91,9 @@ router.get('/Search', (req, res) => {
 
 
 // Get all listings with images for a user
+// Route: Retrieve all listings for a specific user by their email
+// Groups and includes images for each listing
+
 router.get('/user/:email', (req, res) => {
   const userEmail = req.params.email;
   const sql = `
@@ -104,6 +113,9 @@ router.get('/user/:email', (req, res) => {
 });
 
 // New Route: GET listings by category
+// Route: Retrieve listings by category
+// Fetches listings filtered by the specified category and includes images
+
 router.get('/category/:category', (req, res) => {
   const category = req.params.category;
   const sql = `
@@ -123,6 +135,8 @@ router.get('/category/:category', (req, res) => {
 });
 
 // Get a single listing by ID
+// Route: Retrieve a single listing by its ID
+// Fetches detailed information about the listing, including images
 router.get('/:id', (req, res) => {
   const listingId = req.params.id;
   const sql = `
@@ -144,6 +158,10 @@ router.get('/:id', (req, res) => {
 // backend/src/routes/listings.js
 
 // Add this route to calculate total earnings for a user
+// Route: Calculate total earnings for a user
+// Aggregates the selling prices of all listings for the given user email
+
+
 router.get('/earnings/:email', async (req, res) => {
   const userEmail = req.params.email;
   const sql = `
@@ -162,6 +180,12 @@ router.get('/earnings/:email', async (req, res) => {
 });
 
 // Create a new listing
+
+// Route: Create a new listing
+// Accepts listing details and image files via a multipart/form-data request
+// Saves the listing in the database and stores associated image paths
+// Handles both existing and newly uploaded images
+
 router.post('/', upload.array('newImages', 10), (req, res) => {
   const {
     listingTitle,
@@ -230,6 +254,11 @@ router.post('/', upload.array('newImages', 10), (req, res) => {
       const listingId = result.insertId;
 
       // Handle existing images
+      // Route: Update an existing listing
+      // Updates listing details in the database and replaces old image associations with new ones
+      // Deletes existing image entries in the database and inserts updated paths
+
+
       let allImages = [];
       if (existingImages) {
         try {
@@ -241,6 +270,10 @@ router.post('/', upload.array('newImages', 10), (req, res) => {
       }
 
       // Handle new images
+      // Route: Delete a listing by its ID
+      // Deletes the listing from the database, retrieves and deletes associated images from the filesystem
+      // Handles image deletion errors gracefully
+
       const newImagePaths = req.files.map(file => file.filename);
       allImages = [...allImages, ...newImagePaths];
 

@@ -10,6 +10,7 @@ function DetailHeader({ carDetails }) {
   return (
     <div>
       <div>
+         {/* Check if carDetails is provided */}
         {carDetails ? (
           <>
             <h2 className="font-bold text-3xl">{carDetails.listingTitle}</h2>

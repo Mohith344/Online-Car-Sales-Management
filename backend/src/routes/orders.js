@@ -12,7 +12,15 @@ const db = require('../db'); // Ensure correct path to db.js
  * - bank_name: String
  * - account_number: String
  * - routing_number: String
+ * 
  */
+// Route: Create a new order
+// Accepts listing details and buyer's payment information via POST request
+// Validates required fields and checks if the listing is available
+// Prevents duplicate bookings for the same buyer and listing
+// Inserts the order into the database and updates the listing status to "booked"
+// Responds with the seller's contact email
+
 router.post('/', async (req, res) => {
   const { listing_id, buyer_email, phone_number, bank_name, account_number, routing_number } = req.body;
 
@@ -146,6 +154,14 @@ router.get('/incoming', async (req, res) => {
  * Path Parameters:
  * - id: Number (Order ID)
  */
+// Route: Accept an order
+// Updates the status of a specific order to "accepted"
+// Ensures the order exists before performing the update
+
+// Route: Cancel an order
+// Deletes a specific order by its ID from the database
+// Returns an error if the order is not found
+
 router.post('/:id/accept', async (req, res) => {
   const { id } = req.params;
 

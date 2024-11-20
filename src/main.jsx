@@ -13,6 +13,8 @@ import Payment from './components/Payment'
 import Confirmation from './components/Confirmation'
 import TestDriveBooking from './components/TestDriveBooking'
 
+// creating a route
+
 const router = createBrowserRouter([
    {
     path: '/',

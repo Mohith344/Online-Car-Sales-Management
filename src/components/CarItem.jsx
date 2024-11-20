@@ -1,3 +1,9 @@
+// Import necessary modules and components
+// - React for creating the component
+// - Separator for visual separation between sections
+// - Icons for car details (fuel type, mileage, gear type)
+// - Link for routing to car listing details page
+
 import React from 'react'
 import { Separator } from './ui/separator'
 import { BsFuelPumpDieselFill } from "react-icons/bs";
@@ -8,6 +14,7 @@ import { Link } from 'react-router-dom';
 
 function CarItem({car}) {
   return (
+    // Link component to navigate to the car details page when clicked
     <Link to={'/listing-details/'+car?.id}>
     <div className="bg-white shadow-lg rounded-xl overflow-hidden transform transition-transform hover:scale-105">
         <h2 className='absolute m-2 bg-green-500 px-2 rounded-full text-sm pb-1 text-white'>New</h2>

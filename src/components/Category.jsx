@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 function Category() {
   return (
+     // Main container for category section, with top margin for spacing
     <div className="mt-40">
       <h2 className="font-bold text-xl text-center mb-10">Browse by Type</h2>
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-6 px-20">

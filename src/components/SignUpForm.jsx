@@ -1,16 +1,14 @@
-// frontend/src/components/SignUpForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useSignUp, useUser } from '@clerk/clerk-react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './SignUpForm.css';
 
 function SignUpForm() {
-  const { isLoaded, signUp, setActive } = useSignUp(); // Access Clerk instance if needed
+  const { isLoaded, signUp, setActive } = useSignUp();
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
-  const [feedback, setFeedback] = React.useState(''); // To prevent multiple submissions
-
-  // Effect to send user data to the backend once the user is available
-  
+  const [feedback, setFeedback] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const onSubmit = async (data) => {
     const { firstName, lastName, email, password, username } = data;
@@ -30,9 +28,10 @@ function SignUpForm() {
 
       if (createdSignUp.status === 'complete') {
         await setActive({ session: createdSignUp.createdSessionId });
-        setFeedback('Sign-up successful!');
-         // User should now be available
-         const sendUserData = async () => {
+        setFeedback('Sign-up successful! Redirecting...');
+
+        // Send user data to backend
+        const sendUserData = async () => {
           try {
             const response = await fetch('http://localhost:5000/api/users', {
               method: 'POST',
@@ -56,11 +55,14 @@ function SignUpForm() {
             console.error('Error sending user data to backend:', error);
             setFeedback('Sign-up succeeded, but failed to send data to server.');
           } finally {
-            reset(); // Reset the form fields
+            reset();
           }
         };
 
-        sendUserData();
+        await sendUserData();
+
+        // Navigate to the profile page or desired location
+        navigate('/profile');
       } else if (createdSignUp.status === 'needsVerification') {
         setFeedback('Please verify your email to complete sign-up.');
       }
@@ -88,7 +90,7 @@ function SignUpForm() {
         <div className="form-group">
           <label htmlFor="firstName">First Name</label>
           <input
-            className='bg-blue-100 rounded-sm border border-blue-200'
+            className="bg-blue-100 rounded-sm border border-blue-200"
             id="firstName"
             type="text"
             {...register('firstName', { required: 'First name is required.' })}
@@ -100,7 +102,7 @@ function SignUpForm() {
         <div className="form-group">
           <label htmlFor="lastName">Last Name</label>
           <input
-            className='bg-blue-100 rounded-sm border border-blue-200'
+            className="bg-blue-100 rounded-sm border border-blue-200"
             id="lastName"
             type="text"
             {...register('lastName', { required: 'Last name is required.' })}
@@ -112,7 +114,7 @@ function SignUpForm() {
         <div className="form-group">
           <label htmlFor="username">Username</label>
           <input
-            className='bg-blue-100 rounded-sm border border-blue-200'
+            className="bg-blue-100 rounded-sm border border-blue-200"
             id="username"
             type="text"
             {...register('username', { required: 'Username is required.' })}
@@ -124,7 +126,7 @@ function SignUpForm() {
         <div className="form-group">
           <label htmlFor="email">Email Address</label>
           <input
-            className='bg-blue-100 rounded-sm border border-blue-200'
+            className="bg-blue-100 rounded-sm border border-blue-200"
             id="email"
             type="email"
             {...register('email', {
@@ -142,7 +144,7 @@ function SignUpForm() {
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
-            className='bg-blue-100 rounded-sm border border-blue-200'
+            className="bg-blue-100 rounded-sm border border-blue-200"
             id="password"
             type="password"
             {...register('password', {

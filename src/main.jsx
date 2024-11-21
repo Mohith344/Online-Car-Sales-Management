@@ -12,6 +12,7 @@ import ListingDetail from './listing-details/[id]'
 import Payment from './components/Payment'
 import Confirmation from './components/Confirmation'
 import TestDriveBooking from './components/TestDriveBooking'
+import SignUpForm from './components/SignUpForm'
 
 // creating a route
 
@@ -59,7 +60,11 @@ const router = createBrowserRouter([
    {
     path:'/test-drive-booking/:id',
     element: <TestDriveBooking />
-   }
+   },
+   {
+    path: '/signup',
+    element: <SignUpForm />,
+  }
 ])
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;

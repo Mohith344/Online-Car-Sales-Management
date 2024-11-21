@@ -25,8 +25,6 @@ function Home() {
       <MostSearchedCar />
       {/* Info Section */}
       <InfoSection />
-      {/* Sign-Up Form (Visible Only When Not Signed In) */}
-      {!isSignedIn && <SignUpForm />}
       {/* Footer */}
       <Footer />
     </div>
